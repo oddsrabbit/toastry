@@ -1,0 +1,49 @@
+{
+  "name": "@oddsrabbit/toastry",
+  "version": "1.0.0",
+  "description": "A beautiful, modern toast notification library for JavaScript.",
+  "main": "dist/toastry.cjs",
+  "module": "dist/toastry.module.js",
+  "types": "dist/toastry.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/toastry.d.ts",
+      "import": "./dist/toastry.module.js",
+      "require": "./dist/toastry.cjs"
+    },
+    "./css": "./dist/toastry.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "toast",
+    "notifications",
+    "javascript",
+    "lightweight",
+    "no-dependencies"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "OddsRabbit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oddsrabbit/toastry.git"
+  },
+  "homepage": "https://oddsrabbit.github.io/toastry/",
+  "bugs": {
+    "url": "https://github.com/oddsrabbit/toastry/issues"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

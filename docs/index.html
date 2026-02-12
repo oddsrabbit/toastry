@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toastry — Beautiful Toast Notifications for JS</title>
+    <meta name="description" content="A beautiful, modern toast notification library for JavaScript. Zero dependencies, ~5 KB gzipped.">
+    <!-- CSS is auto-injected by the JS bundle. Standalone CSS available at dist/toastry.css if needed. -->
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --page-bg: #fafafa;
+            --surface: #fff;
+            --border: #e5e7eb;
+            --text: #171717;
+            --text-muted: #6b7280;
+            --text-faint: #9ca3af;
+            --accent: #171717;
+            --accent-soft: #f4f4f5;
+            --code-bg: #f4f4f5;
+            --max-w: 720px;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Nav --- */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250, 250, 250, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav .nav-inner {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .nav-brand {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        nav .nav-by {
+            font-weight: 400;
+            font-size: 13px;
+            color: var(--text-faint);
+        }
+
+        nav .nav-or {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        nav .nav-links a {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        nav .nav-links a:hover {
+            color: var(--text);
+        }
+
+        /* --- Sections --- */
+        section {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        section + section {
+            padding-top: 0;
+        }
+
+        /* --- Hero --- */
+        .hero {
+            padding-top: 80px;
+            padding-bottom: 48px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .hero .tagline {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .hero .stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .hero .stat {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--accent-soft);
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        .hero-btns {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero .try-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+
+        .hero .try-btn:hover {
+            opacity: 0.85;
+        }
+
+        .hero .github-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .hero .github-btn:hover {
+            background: var(--accent-soft);
+            border-color: #d1d5db;
+        }
+
+        /* --- Section headings --- */
+        .section-heading {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 28px;
+        }
+
+        /* --- Playground --- */
+        .playground-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .playground-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-faint);
+            margin-bottom: 12px;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .btn-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn:hover {
+            background: var(--accent-soft);
+            border-color: #d1d5db;
+        }
+
+        .btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn.active:hover {
+            opacity: 0.9;
+        }
+
+        .btn-success { color: #16a34a; }
+        .btn-error { color: #dc2626; }
+        .btn-warning { color: #f59e0b; }
+        .btn-info { color: #2563eb; }
+
+        .btn-sm {
+            font-size: 13px;
+            padding: 6px 12px;
+        }
+
+        .btn-dismiss {
+            color: var(--text-faint);
+            border-style: dashed;
+        }
+
+        /* --- Code blocks --- */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 10px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .code-block pre {
+            font-family: 'SF Mono', ui-monospace, monospace;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: var(--text);
+        }
+
+        .code-block .cm { color: var(--text-faint); }
+        .code-block .kw { color: #8b5cf6; }
+        .code-block .st { color: #16a34a; }
+        .code-block .fn { color: #2563eb; }
+        .code-block .p { color: var(--text-muted); }
+
+        /* --- API cards --- */
+        .api-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+
+        .api-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            margin-bottom: 8px;
+        }
+
+        .api-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .api-card .code-block {
+            margin-bottom: 0;
+        }
+
+        .api-try-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 12px;
+            padding: 5px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            color: var(--text-muted);
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .api-try-btn:hover {
+            background: var(--accent-soft);
+            border-color: #d1d5db;
+            color: var(--text);
+        }
+
+        .api-try-btn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* --- CSS variables table --- */
+        .var-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .var-table th {
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-faint);
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .var-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .var-table td:first-child {
+            font-family: 'SF Mono', ui-monospace, monospace;
+            font-size: 13px;
+            color: #8b5cf6;
+        }
+
+        .var-table .swatch {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        /* --- Footer --- */
+        footer {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-faint);
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: var(--text);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 36px; }
+            .hero .tagline { font-size: 16px; }
+            .hero .stats { gap: 12px; }
+            nav .nav-links { gap: 16px; }
+            nav .nav-links a { font-size: 13px; }
+            footer { flex-direction: column; gap: 8px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="nav-brand">Toastry <span class="nav-by">by <span class="nav-or">OddsRabbit</span></span></a>
+        <ul class="nav-links">
+            <li><a href="#playground">Playground</a></li>
+            <li><a href="#installation">Install</a></li>
+            <li><a href="#api">API</a></li>
+            <li><a href="#customization">Customize</a></li>
+            <li><a href="https://github.com/oddsrabbit/toastry" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <h1>Toastry</h1>
+    <p class="tagline">Beautiful, modern toast notifications for JavaScript.</p>
+    <div class="stats">
+        <span class="stat">~5 KB gzipped</span>
+        <span class="stat">Zero dependencies</span>
+        <span class="stat">MIT License</span>
+    </div>
+    <div class="hero-btns">
+        <button class="try-btn" onclick="toast('Welcome to Toastry!')">
+            Try a toast
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+        <a class="github-btn" href="https://github.com/oddsrabbit/toastry" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+        </a>
+    </div>
+</section>
+
+<!-- Playground -->
+<section id="playground">
+    <h2 class="section-heading">Playground</h2>
+    <p class="section-subtitle">Click the buttons to test every toast type and feature.</p>
+
+    <div class="playground-card">
+        <p class="playground-label">Position</p>
+        <div class="btn-row" id="position-btns">
+            <button class="btn btn-sm active" data-pos="bottom-right">Bottom Right</button>
+            <button class="btn btn-sm" data-pos="top-right">Top Right</button>
+            <button class="btn btn-sm" data-pos="bottom-left">Bottom Left</button>
+            <button class="btn btn-sm" data-pos="top-left">Top Left</button>
+        </div>
+
+        <p class="playground-label">Types</p>
+        <div class="btn-row">
+            <button class="btn" onclick="toast('This is a default toast')">Default</button>
+            <button class="btn btn-success" onclick="toast.success('Saved successfully')">Success</button>
+            <button class="btn btn-error" onclick="toast.error('Something went wrong')">Error</button>
+            <button class="btn btn-warning" onclick="toast.warning('Please check your input')">Warning</button>
+            <button class="btn btn-info" onclick="toast.info('New update available')">Info</button>
+        </div>
+
+        <p class="playground-label">Features</p>
+        <div class="btn-row">
+            <button class="btn" onclick="toast.success('Profile updated', { description: 'Your changes have been saved to your account.' })">With Description</button>
+            <button class="btn" onclick="toast('File deleted', { action: { label: 'Undo', onClick: () => toast.success('Restored!') } })">With Action</button>
+            <button class="btn" onclick="showLoading()">Loading</button>
+            <button class="btn" onclick="showPromise()">Promise</button>
+            <button class="btn" onclick="toast('This one sticks around.', { duration: 0 })">Persistent</button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-dismiss" onclick="toast.dismiss()">Dismiss All</button>
+        </div>
+    </div>
+</section>
+
+<!-- Installation -->
+<section id="installation">
+    <h2 class="section-heading">Installation</h2>
+    <p class="section-subtitle">Get started in under a minute.</p>
+
+    <h3 style="font-size:15px; font-weight:600; margin-bottom:12px;">npm</h3>
+    <div class="code-block"><pre>npm install @oddsrabbit/toastry</pre></div>
+
+    <h3 style="font-size:15px; font-weight:600; margin-bottom:12px;">CDN (script tag)</h3>
+    <div class="code-block"><pre><span class="p">&lt;</span><span class="kw">script</span> src=<span class="st">"https://unpkg.com/@oddsrabbit/toastry@1/dist/toastry.js"</span><span class="p">&gt;&lt;/</span><span class="kw">script</span><span class="p">&gt;</span>
+
+<span class="p">&lt;</span><span class="kw">script</span><span class="p">&gt;</span>
+  <span class="fn">toast</span>(<span class="st">'Hello world'</span>);
+<span class="p">&lt;/</span><span class="kw">script</span><span class="p">&gt;</span></pre></div>
+
+    <h3 style="font-size:15px; font-weight:600; margin-bottom:12px;">ES Modules</h3>
+    <div class="code-block"><pre><span class="kw">import</span> toast <span class="kw">from</span> <span class="st">'@oddsrabbit/toastry'</span>;
+
+<span class="fn">toast</span>(<span class="st">'Hello world'</span>);</pre></div>
+
+    <p style="font-size:13px; color:var(--text-faint); margin-top:4px;">CSS is auto-injected. A standalone file is also available at <code style="font-size:12px;">@oddsrabbit/toastry/css</code> if needed.</p>
+</section>
+
+<!-- API Reference -->
+<section id="api">
+    <h2 class="section-heading">API Reference</h2>
+    <p class="section-subtitle">Every method Toastry provides.</p>
+
+    <div class="api-card">
+        <h3>toast(message, options?)</h3>
+        <p>Show a default toast. Returns a numeric ID you can use to dismiss it later.</p>
+        <div class="code-block"><pre><span class="fn">toast</span>(<span class="st">'Hello world'</span>);
+
+<span class="cm">// With options</span>
+<span class="fn">toast</span>(<span class="st">'Check this out'</span>, {
+  description: <span class="st">'A longer explanation below the title.'</span>,
+  duration: 5000,
+});</pre></div>
+        <button class="api-try-btn" onclick="toast('Check this out', { description: 'A longer explanation below the title.', duration: 5000 })"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.success(message, options?)</h3>
+        <p>Green checkmark toast for success states.</p>
+        <div class="code-block"><pre><span class="fn">toast.success</span>(<span class="st">'Saved successfully'</span>);</pre></div>
+        <button class="api-try-btn" onclick="toast.success('Saved successfully')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.error(message, options?)</h3>
+        <p>Red X toast for error states.</p>
+        <div class="code-block"><pre><span class="fn">toast.error</span>(<span class="st">'Something went wrong'</span>);</pre></div>
+        <button class="api-try-btn" onclick="toast.error('Something went wrong')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.warning(message, options?)</h3>
+        <p>Yellow triangle toast for warnings.</p>
+        <div class="code-block"><pre><span class="fn">toast.warning</span>(<span class="st">'Are you sure?'</span>);</pre></div>
+        <button class="api-try-btn" onclick="toast.warning('Are you sure?')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.info(message, options?)</h3>
+        <p>Blue info circle toast for informational messages.</p>
+        <div class="code-block"><pre><span class="fn">toast.info</span>(<span class="st">'New update available'</span>);</pre></div>
+        <button class="api-try-btn" onclick="toast.info('New update available')"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.loading(message, options?)</h3>
+        <p>Spinner toast that stays visible until manually dismissed. Does not auto-dismiss.</p>
+        <div class="code-block"><pre><span class="kw">const</span> id = <span class="fn">toast.loading</span>(<span class="st">'Uploading...'</span>);
+
+<span class="cm">// When done:</span>
+<span class="fn">toast.dismiss</span>(id);</pre></div>
+        <button class="api-try-btn" onclick="showLoading()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.promise(promise, states)</h3>
+        <p>Automatically transitions from loading to success or error based on promise resolution. Returns the original promise.</p>
+        <div class="code-block"><pre><span class="fn">toast.promise</span>(<span class="fn">saveData</span>(), {
+  loading: <span class="st">'Saving...'</span>,
+  success: <span class="st">'Saved!'</span>,
+  error: <span class="st">'Could not save'</span>,
+});
+
+<span class="cm">// Dynamic messages based on result</span>
+<span class="fn">toast.promise</span>(<span class="fn">fetchUser</span>(), {
+  loading: <span class="st">'Loading user...'</span>,
+  success: (user) =&gt; <span class="st">`Welcome, ${user.name}!`</span>,
+  error: (err) =&gt; <span class="st">`Error: ${err.message}`</span>,
+});</pre></div>
+        <button class="api-try-btn" onclick="showPromise()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.dismiss(id?)</h3>
+        <p>Dismiss a specific toast by ID, or dismiss all toasts if no ID is provided.</p>
+        <div class="code-block"><pre><span class="kw">const</span> id = <span class="fn">toast</span>(<span class="st">'Hello'</span>);
+<span class="fn">toast.dismiss</span>(id);     <span class="cm">// Dismiss one</span>
+<span class="fn">toast.dismiss</span>();       <span class="cm">// Dismiss all</span></pre></div>
+        <button class="api-try-btn" onclick="toast.dismiss()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Dismiss all</button>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.configure(options)</h3>
+        <p>Set global defaults. Call once at app startup.</p>
+        <div class="code-block"><pre><span class="fn">toast.configure</span>({
+  position: <span class="st">'top-right'</span>,    <span class="cm">// 'bottom-right' (default) | 'bottom-left' | 'top-right' | 'top-left'</span>
+  duration: 5000,            <span class="cm">// Duration in ms, default: 4000 (0 = no auto-dismiss)</span>
+  maxVisible: 5,             <span class="cm">// Max visible toasts when collapsed (default: 3)</span>
+  maxToasts: 8,              <span class="cm">// Max total toasts before oldest are pruned (default: 5)</span>
+});</pre></div>
+    </div>
+
+    <div class="api-card">
+        <h3>Options Object</h3>
+        <p>Passed as the second argument to any toast method.</p>
+        <div class="code-block"><pre><span class="fn">toast</span>(<span class="st">'File deleted'</span>, {
+  description: <span class="st">'The file has been moved to trash.'</span>,
+  duration: 6000,
+  action: {
+    label: <span class="st">'Undo'</span>,
+    onClick: () =&gt; <span class="fn">toast.success</span>(<span class="st">'Restored!'</span>),
+  },
+});</pre></div>
+        <button class="api-try-btn" onclick="toast('File deleted', { description: 'The file has been moved to trash.', duration: 6000, action: { label: 'Undo', onClick: () => toast.success('Restored!') } })"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 13,8 5,13"/></svg> Try it</button>
+    </div>
+</section>
+
+<!-- Customization -->
+<section id="customization">
+    <h2 class="section-heading">Customization</h2>
+    <p class="section-subtitle">Override CSS variables to match your theme.</p>
+
+    <div style="overflow-x:auto; margin-bottom:24px;">
+        <table class="var-table">
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>--toastry-bg</td><td><span class="swatch" style="background:#fff"></span>#fff</td><td>Toast background</td></tr>
+                <tr><td>--toastry-border</td><td><span class="swatch" style="background:#e5e5e5"></span>#e5e5e5</td><td>Toast border</td></tr>
+                <tr><td>--toastry-text</td><td><span class="swatch" style="background:#171717"></span>#171717</td><td>Title text color</td></tr>
+                <tr><td>--toastry-text-muted</td><td><span class="swatch" style="background:#6b7280"></span>#6b7280</td><td>Description text color</td></tr>
+                <tr><td>--toastry-text-faint</td><td><span class="swatch" style="background:#9ca3af"></span>#9ca3af</td><td>Close button color</td></tr>
+                <tr><td>--toastry-accent</td><td><span class="swatch" style="background:#2563eb"></span>#2563eb</td><td>Info icon &amp; action text</td></tr>
+                <tr><td>--toastry-success</td><td><span class="swatch" style="background:#16a34a"></span>#16a34a</td><td>Success icon color</td></tr>
+                <tr><td>--toastry-error</td><td><span class="swatch" style="background:#dc2626"></span>#dc2626</td><td>Error icon color</td></tr>
+                <tr><td>--toastry-warning</td><td><span class="swatch" style="background:#f59e0b"></span>#f59e0b</td><td>Warning icon color</td></tr>
+                <tr><td>--toastry-close-hover-bg</td><td><span class="swatch" style="background:#f3f4f6"></span>#f3f4f6</td><td>Close button hover bg</td></tr>
+                <tr><td>--toastry-action-border</td><td><span class="swatch" style="background:#e5e7eb"></span>#e5e7eb</td><td>Action button border</td></tr>
+                <tr><td>--toastry-action-border-hover</td><td><span class="swatch" style="background:#d1d5db"></span>#d1d5db</td><td>Action button hover border</td></tr>
+                <tr><td>--toastry-spinner-track</td><td><span class="swatch" style="background:#e5e7eb"></span>#e5e7eb</td><td>Loading spinner track</td></tr>
+                <tr><td>--toastry-font</td><td colspan="2">system-ui, -apple-system, sans-serif</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 style="font-size:15px; font-weight:600; margin-bottom:12px;">Dark Mode Example</h3>
+    <div class="code-block"><pre><span class="kw">@media</span> (prefers-color-scheme: dark) {
+  :root {
+    --toastry-bg: <span class="st">#1c1c1c</span>;
+    --toastry-border: <span class="st">#333</span>;
+    --toastry-text: <span class="st">#f5f5f5</span>;
+    --toastry-text-muted: <span class="st">#a1a1aa</span>;
+    --toastry-text-faint: <span class="st">#71717a</span>;
+    --toastry-close-hover-bg: <span class="st">#2a2a2a</span>;
+    --toastry-action-border: <span class="st">#3f3f46</span>;
+    --toastry-action-border-hover: <span class="st">#52525b</span>;
+    --toastry-spinner-track: <span class="st">#3f3f46</span>;
+  }
+}</pre></div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <span>MIT License &middot; Built by <a href="https://www.oddsrabbit.com" target="_blank" rel="noopener">OddsRabbit</a></span>
+    <a href="https://github.com/oddsrabbit/toastry" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+<script src="https://unpkg.com/@oddsrabbit/toastry@1/dist/toastry.js"></script>
+<script>
+    // Position switcher
+    document.querySelectorAll('#position-btns [data-pos]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#position-btns [data-pos]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            toast.configure({ position: btn.dataset.pos });
+        });
+    });
+
+    // Loading demo
+    function showLoading() {
+        const id = toast.loading('Uploading file...');
+        setTimeout(() => {
+            toast.dismiss(id);
+            toast.success('Upload complete');
+        }, 2000);
+    }
+
+    // Promise demo
+    function showPromise() {
+        const fakePromise = new Promise((resolve) => {
+            setTimeout(() => resolve({ name: 'John' }), 2000);
+        });
+
+        toast.promise(fakePromise, {
+            loading: 'Fetching user data...',
+            success: (data) => `Welcome back, ${data.name}!`,
+            error: 'Failed to load user',
+        });
+    }
+</script>
+
+</body>
+</html>
