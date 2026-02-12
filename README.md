@@ -1,5 +1,9 @@
 # Toastry
 
+<img width="1390" height="392" alt="CleanShot 2026-02-12 at 18 33 02@2x" src="https://github.com/user-attachments/assets/87db051f-c50f-483f-a5bb-3023c50cafaa" />
+
+
+
 A beautiful, modern toast notification library for JavaScript.
 
 - **~5 KB** gzipped (CSS auto-injected)
@@ -12,6 +16,8 @@ A beautiful, modern toast notification library for JavaScript.
 - Works with ES modules, CommonJS, and `<script>` tags
 
 **[View full docs & playground →](https://oddsrabbit.github.io/toastry/)**
+
+![toastry-preview](https://github.com/user-attachments/assets/219a18be-23b1-492b-a9d3-06e922913b7e)
 
 ## Install
 
