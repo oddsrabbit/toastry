@@ -25,6 +25,8 @@ A beautiful, modern toast notification library for JavaScript.
 npm install @oddsrabbit/toastry
 ```
 
+[View on npm →](https://www.npmjs.com/package/@oddsrabbit/toastry)
+
 Or use a CDN:
 
 ```html

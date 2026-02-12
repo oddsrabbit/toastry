@@ -186,6 +186,21 @@
                scale(1);
 }
 
+/* Swiping while expanded — must override expanded transforms */
+[data-position="bottom-right"][data-expanded="true"] [data-toastry-toast][data-swiping="true"],
+[data-position="bottom-left"][data-expanded="true"] [data-toastry-toast][data-swiping="true"] {
+    transition: none;
+    transform: translateY(calc(var(--toastry-expanded-offset, 0) * -1px))
+               translateX(var(--toastry-swipe, 0px));
+}
+
+[data-position="top-right"][data-expanded="true"] [data-toastry-toast][data-swiping="true"],
+[data-position="top-left"][data-expanded="true"] [data-toastry-toast][data-swiping="true"] {
+    transition: none;
+    transform: translateY(calc(var(--toastry-expanded-offset, 0) * 1px))
+               translateX(var(--toastry-swipe, 0px));
+}
+
 /* Non-front toasts when collapsed */
 [data-toastry-toast][data-front="false"][data-mounted="true"] {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
