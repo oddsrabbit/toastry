@@ -1,4 +1,21 @@
-/* Toastry — Lightweight toast notifications */
+/* Toastry — Beautiful, modern toast notifications */
+
+:root {
+    --toastry-bg: #fff;
+    --toastry-border: #e5e5e5;
+    --toastry-text: #171717;
+    --toastry-text-muted: #6b7280;
+    --toastry-text-faint: #9ca3af;
+    --toastry-accent: #2563eb;
+    --toastry-success: #16a34a;
+    --toastry-error: #dc2626;
+    --toastry-warning: #f59e0b;
+    --toastry-close-hover-bg: #f3f4f6;
+    --toastry-action-border: #e5e7eb;
+    --toastry-action-border-hover: #d1d5db;
+    --toastry-spinner-track: #e5e7eb;
+    --toastry-font: system-ui, -apple-system, sans-serif;
+}
 
 [data-toastry] {
     position: fixed;
@@ -145,22 +162,10 @@
     transition: transform 500ms, opacity 200ms;
 }
 
-/* Swipe transform */
+/* Swiping — disable transitions, JS handles transform inline */
 [data-toastry-toast][data-swiping="true"] {
-    transition: none;
+    transition: none !important;
     cursor: grabbing;
-}
-
-[data-position="bottom-right"] [data-toastry-toast][data-swiping="true"],
-[data-position="bottom-left"] [data-toastry-toast][data-swiping="true"] {
-    transform: translateY(calc(var(--toastry-offset, 0) * -1px))
-               translateX(var(--toastry-swipe, 0px));
-}
-
-[data-position="top-right"] [data-toastry-toast][data-swiping="true"],
-[data-position="top-left"] [data-toastry-toast][data-swiping="true"] {
-    transform: translateY(calc(var(--toastry-offset, 0) * 1px))
-               translateX(var(--toastry-swipe, 0px));
 }
 
 /* Expanded — container becomes hover target */
@@ -184,21 +189,6 @@
                 opacity 0.3s ease;
     transform: translateY(calc(var(--toastry-expanded-offset, 0) * 1px))
                scale(1);
-}
-
-/* Swiping while expanded — must override expanded transforms */
-[data-position="bottom-right"][data-expanded="true"] [data-toastry-toast][data-swiping="true"],
-[data-position="bottom-left"][data-expanded="true"] [data-toastry-toast][data-swiping="true"] {
-    transition: none;
-    transform: translateY(calc(var(--toastry-expanded-offset, 0) * -1px))
-               translateX(var(--toastry-swipe, 0px));
-}
-
-[data-position="top-right"][data-expanded="true"] [data-toastry-toast][data-swiping="true"],
-[data-position="top-left"][data-expanded="true"] [data-toastry-toast][data-swiping="true"] {
-    transition: none;
-    transform: translateY(calc(var(--toastry-expanded-offset, 0) * 1px))
-               translateX(var(--toastry-swipe, 0px));
 }
 
 /* Non-front toasts when collapsed */

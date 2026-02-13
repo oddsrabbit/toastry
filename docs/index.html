@@ -51,13 +51,16 @@
         }
 
         nav .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        nav .nav-brand-name {
             font-weight: 700;
             font-size: 16px;
             color: var(--text);
             text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         nav .nav-by {
@@ -66,9 +69,15 @@
             color: var(--text-faint);
         }
 
-        nav .nav-or {
+        nav .nav-or-link {
             font-weight: 500;
             color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        nav .nav-or-link:hover {
+            color: var(--text);
         }
 
         nav .nav-links {
@@ -422,7 +431,7 @@
 
 <nav>
     <div class="nav-inner">
-        <a href="#" class="nav-brand">Toastry <span class="nav-by">by <span class="nav-or">OddsRabbit</span></span></a>
+        <span class="nav-brand"><a href="#" class="nav-brand-name">Toastry</a> <span class="nav-by">by <a href="https://www.oddsrabbit.com" target="_blank" rel="noopener" class="nav-or-link">OddsRabbit</a></span></span>
         <ul class="nav-links">
             <li><a href="#playground">Playground</a></li>
             <li><a href="#installation">Install</a></li>

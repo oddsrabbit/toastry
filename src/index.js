@@ -355,6 +355,9 @@ class ToastManager {
                 collapsedHeight = t.height + (count - 1) * GAP;
             }
 
+            // Don't override styles on a toast being swiped
+            if (this.swipingToast === t.id) return;
+
             if (!this.expanded && reverseIndex >= config.maxVisible) {
                 t.el.style.opacity = '0';
                 t.el.style.pointerEvents = 'none';
@@ -379,6 +382,15 @@ class ToastManager {
 
     // --- Swipe ---
 
+    _getSwipeBaseTransform(t) {
+        const isTop = config.position.startsWith('top');
+        const dir = isTop ? 1 : -1;
+        const yOffset = this.expanded
+            ? parseFloat(t.el.style.getPropertyValue('--toastry-expanded-offset')) || 0
+            : parseFloat(t.el.style.getPropertyValue('--toastry-offset')) || 0;
+        return `translateY(${yOffset * dir}px)`;
+    }
+
     _onPointerDown(e, id) {
         const t = this.toasts.find(x => x.id === id);
         if (!t || t.dismissing) return;
@@ -396,15 +408,12 @@ class ToastManager {
         if (!t || t.dismissing) return;
 
         const dx = e.clientX - this.pointerStart.x;
-
-        // Determine swipe direction based on position
-        const isRight = config.position.endsWith('right');
-        const amount = isRight ? Math.max(0, dx) : Math.max(0, -dx);
+        const amount = Math.abs(dx);
 
         if (amount > 2) {
             t.el.setAttribute('data-swiping', 'true');
-            const signedAmount = isRight ? amount : -amount;
-            t.el.style.setProperty('--toastry-swipe', signedAmount + 'px');
+            const base = this._getSwipeBaseTransform(t);
+            t.el.style.transform = `${base} translateX(${dx}px)`;
             t.el.style.opacity = Math.max(0, 1 - amount / (SWIPE_THRESHOLD * 2.5));
         }
     }
@@ -415,7 +424,7 @@ class ToastManager {
         const t = this.toasts.find(x => x.id === id);
         if (t && !t.dismissing) {
             t.el.removeAttribute('data-swiping');
-            t.el.style.removeProperty('--toastry-swipe');
+            t.el.style.transform = '';
             t.el.style.opacity = '';
         }
         this._resetSwipe();
@@ -431,20 +440,20 @@ class ToastManager {
         }
 
         const dx = e.clientX - this.pointerStart.x;
-        const isRight = config.position.endsWith('right');
-        const amount = isRight ? Math.max(0, dx) : Math.max(0, -dx);
+        const amount = Math.abs(dx);
         const elapsed = Date.now() - this.swipeStartTime;
         const velocity = amount / Math.max(elapsed, 1);
 
         if (amount >= SWIPE_THRESHOLD || velocity >= VELOCITY_THRESHOLD) {
-            const direction = isRight ? '150%' : '-150%';
-            t.el.style.setProperty('--toastry-swipe', direction);
+            const direction = dx > 0 ? '150%' : '-150%';
+            const base = this._getSwipeBaseTransform(t);
+            t.el.style.transform = `${base} translateX(${direction})`;
             t.el.style.opacity = '0';
             t.el.style.transition = 'transform 0.2s ease, opacity 0.15s ease';
             setTimeout(() => this.dismiss(id), 150);
         } else {
             t.el.removeAttribute('data-swiping');
-            t.el.style.removeProperty('--toastry-swipe');
+            t.el.style.transform = '';
             t.el.style.opacity = '';
         }
 

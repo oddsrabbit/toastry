@@ -1,6 +1,6 @@
 {
   "name": "@oddsrabbit/toastry",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A beautiful, modern toast notification library for JavaScript.",
   "main": "dist/toastry.cjs",
   "module": "dist/toastry.module.js",
