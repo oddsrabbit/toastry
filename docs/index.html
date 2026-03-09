@@ -490,6 +490,7 @@
         <div class="btn-row">
             <button class="btn" onclick="toast.success('Profile updated', { description: 'Your changes have been saved to your account.' })">With Description</button>
             <button class="btn" onclick="toast('File deleted', { action: { label: 'Undo', onClick: () => toast.success('Restored!') } })">With Action</button>
+            <button class="btn" onclick="toast('Achievement Unlocked', { icon: 'https://images.oddsrabbit.com/7689c1d469505b9ed05cb889bfff89631fc6b61f48bb505d168ee04c285d0ee6.png', description: '+25 karats' })">Custom Icon</button>
             <button class="btn" onclick="showLoading()">Loading</button>
             <button class="btn" onclick="showPromise()">Promise</button>
             <button class="btn" onclick="toast('This one sticks around.', { duration: 0 })">Persistent</button>
@@ -624,6 +625,7 @@
         <div class="code-block"><pre><span class="fn">toast</span>(<span class="st">'File deleted'</span>, {
   description: <span class="st">'The file has been moved to trash.'</span>,
   duration: 6000,
+  icon: <span class="st">'https://example.com/icon.png'</span>,  <span class="cm">// Custom image URL (overrides type icon)</span>
   action: {
     label: <span class="st">'Undo'</span>,
     onClick: () =&gt; <span class="fn">toast.success</span>(<span class="st">'Restored!'</span>),

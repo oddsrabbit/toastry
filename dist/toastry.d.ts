@@ -6,6 +6,7 @@ export interface ToastAction {
 export interface ToastOptions {
   description?: string;
   duration?: number;
+  icon?: string;
   action?: ToastAction;
   type?: 'default' | 'success' | 'error' | 'warning' | 'info' | 'loading';
 }

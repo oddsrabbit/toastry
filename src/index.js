@@ -130,8 +130,10 @@ class ToastManager {
 
         let html = '';
 
-        // Icon
-        if (ICONS[type]) {
+        // Icon — custom image URL takes priority over type-based SVG
+        if (options.icon) {
+            html += `<div class="toastry-icon"><img src="${this._escape(options.icon)}" alt=""></div>`;
+        } else if (ICONS[type]) {
             html += `<div class="toastry-icon">${ICONS[type]}</div>`;
         }
 
@@ -256,13 +258,17 @@ class ToastManager {
         t.type = type;
 
         const iconEl = t.el.querySelector('.toastry-icon');
-        if (ICONS[type]) {
+        const iconContent = options.icon
+            ? `<img src="${this._escape(options.icon)}" alt="">`
+            : ICONS[type] || null;
+
+        if (iconContent) {
             if (iconEl) {
-                iconEl.innerHTML = ICONS[type];
+                iconEl.innerHTML = iconContent;
             } else {
                 const icon = document.createElement('div');
                 icon.className = 'toastry-icon';
-                icon.innerHTML = ICONS[type];
+                icon.innerHTML = iconContent;
                 t.el.insertBefore(icon, t.el.firstChild);
             }
         } else if (iconEl) {
