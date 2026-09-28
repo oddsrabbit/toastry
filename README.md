@@ -10,6 +10,7 @@ A beautiful, modern toast notification library for JavaScript.
 - **Zero dependencies**
 - Smooth stacking animations with hover-to-expand
 - Swipe to dismiss
+- Optional "Dismiss all" button for stacks (`toast.configure({ clearAll: true })`)
 - Promise API for async operations
 - 4 positions: `bottom-right`, `bottom-left`, `top-right`, `top-left`
 - Fully customizable via CSS variables

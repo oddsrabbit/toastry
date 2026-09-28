@@ -6,6 +6,10 @@ const VELOCITY_THRESHOLD = 0.3;
 const UNMOUNT_DELAY = 200;
 const COLLAPSE_DELAY = 200;
 
+// A lone toast already has its own close button, so "dismiss all" only
+// appears once there is more than one toast it would act on.
+const CLEAR_ALL_MIN = 2;
+
 let _styleInjected = false;
 
 function _injectStyles() {
@@ -23,6 +27,8 @@ let config = {
     maxToasts: 5,
     duration: 4000,
     position: 'bottom-right',
+    clearAll: false,
+    clearAllLabel: 'Dismiss all',
 };
 
 // SVG icons for each toast type
@@ -37,6 +43,14 @@ const ICONS = {
 const CLOSE_ICON = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>';
 
 let toastId = 0;
+
+function _isFocusVisible(el) {
+    try {
+        return el.matches(':focus-visible');
+    } catch {
+        return false; // selector unsupported — treat as pointer focus
+    }
+}
 const _escapeDiv = typeof document !== 'undefined' ? document.createElement('div') : null;
 
 class ToastManager {
@@ -45,8 +59,11 @@ class ToastManager {
         this.container = null;
         this.expanded = false;
         this.hovering = false;
+        this.focused = false;
         this._collapseTimer = null;
         this._visibilityHandler = null;
+        this._clearAllBtn = null;
+        this._clearAllPointer = null;
 
         // Pointer tracking for swipe
         this.swipingToast = null;
@@ -64,32 +81,63 @@ class ToastManager {
 
         this.container.addEventListener('mouseenter', () => {
             this.hovering = true;
-            clearTimeout(this._collapseTimer);
-            this._collapseTimer = null;
-            this._setExpanded(true);
-            this._pauseAllTimers();
+            this._engage();
         });
         this.container.addEventListener('mouseleave', () => {
             this.hovering = false;
-            if (!this.swipingToast) {
-                this._collapseTimer = setTimeout(() => {
-                    this._collapseTimer = null;
-                    if (!this.hovering) {
-                        this._resumeAllTimers();
-                        this._setExpanded(false);
-                    }
-                }, COLLAPSE_DELAY);
-            }
+            if (!this.swipingToast) this._scheduleCollapse();
+        });
+
+        // Keyboard focus expands the stack like hover does, so the buttons it
+        // reveals (e.g. "dismiss all") are reachable without a mouse. Only
+        // keyboard focus counts — a clicked button keeps focus after the
+        // pointer leaves, which would otherwise pin the stack open.
+        this.container.addEventListener('focusin', (e) => {
+            if (!_isFocusVisible(e.target)) return;
+            this.focused = true;
+            this._engage();
+        });
+        this.container.addEventListener('focusout', (e) => {
+            if (this.container && this.container.contains(e.relatedTarget)) return;
+            this._onFocusLost();
         });
 
         this._visibilityHandler = () => {
             if (document.hidden) {
                 this._pauseAllTimers();
-            } else if (!this.hovering) {
+            } else if (!this._isEngaged()) {
                 this._resumeAllTimers();
             }
         };
         document.addEventListener('visibilitychange', this._visibilityHandler);
+    }
+
+    _isEngaged() {
+        return this.hovering || this.focused;
+    }
+
+    _engage() {
+        clearTimeout(this._collapseTimer);
+        this._collapseTimer = null;
+        this._setExpanded(true);
+        this._pauseAllTimers();
+    }
+
+    _scheduleCollapse() {
+        clearTimeout(this._collapseTimer);
+        this._collapseTimer = setTimeout(() => {
+            this._collapseTimer = null;
+            if (!this._isEngaged()) {
+                this._resumeAllTimers();
+                this._setExpanded(false);
+            }
+        }, COLLAPSE_DELAY);
+    }
+
+    _onFocusLost() {
+        if (!this.focused) return;
+        this.focused = false;
+        if (!this.hovering && !this.swipingToast) this._scheduleCollapse();
     }
 
     _setExpanded(expanded) {
@@ -178,7 +226,8 @@ class ToastManager {
         el.addEventListener('pointerup', (e) => this._onPointerUp(e, id));
         el.addEventListener('pointercancel', () => this._onPointerCancel(id));
 
-        this.container.appendChild(el);
+        // Keep the dismiss-all button last, so it's the final tab stop.
+        this.container.insertBefore(el, this._clearAllBtn);
 
         const t = {
             id,
@@ -207,6 +256,16 @@ class ToastManager {
         return id;
     }
 
+    /**
+     * Dismiss every toast except loading ones. A loading toast stands for work
+     * still in flight — removing it would hide whether that work succeeded.
+     */
+    dismissAll() {
+        [...this.toasts]
+            .filter(t => !t.dismissing && t.type !== 'loading')
+            .forEach(t => this.dismiss(t.id));
+    }
+
     dismiss(id) {
         if (id === undefined) {
             [...this.toasts].forEach(t => this.dismiss(t.id));
@@ -227,11 +286,17 @@ class ToastManager {
             this.toasts = this.toasts.filter(x => x.id !== id);
             this._updateLayout();
 
+            // Removing a focused element doesn't reliably fire focusout.
+            if (this.focused && this.container && !this.container.contains(document.activeElement)) {
+                this._onFocusLost();
+            }
+
             if (this.toasts.length === 0) {
                 clearTimeout(this._collapseTimer);
                 this._collapseTimer = null;
                 this.expanded = false;
                 this.hovering = false;
+                this.focused = false;
                 if (this._visibilityHandler) {
                     document.removeEventListener('visibilitychange', this._visibilityHandler);
                     this._visibilityHandler = null;
@@ -239,6 +304,7 @@ class ToastManager {
                 if (this.container) {
                     this.container.remove();
                     this.container = null;
+                    this._clearAllBtn = null;
                 }
             }
         }, UNMOUNT_DELAY);
@@ -377,6 +443,67 @@ class ToastManager {
             const height = this.expanded ? expandedOffset : collapsedHeight;
             this.container.style.height = (height || 0) + 'px';
         }
+
+        this._syncClearAll(visible);
+    }
+
+    /**
+     * Keep the "dismiss all" button in step with config and the stack. The
+     * button lives inside the container (so hovering it keeps the stack
+     * expanded) and is positioned off the stack's growing edge in CSS. JS only
+     * says whether it applies; CSS decides when it's visible (expanded on
+     * hover-capable devices, always on touch).
+     */
+    _syncClearAll(visible) {
+        if (!this.container) return;
+
+        if (!config.clearAll) {
+            if (this._clearAllBtn) {
+                this._clearAllBtn.remove();
+                this._clearAllBtn = null;
+            }
+            this.container.removeAttribute('data-clearable');
+            return;
+        }
+
+        if (!this._clearAllBtn) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'toastry-clear-all';
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.dismissAll();
+                // The button hides once nothing is left to clear; don't leave
+                // keyboard focus stranded on it.
+                if (document.activeElement === btn) btn.blur();
+            });
+            // On touch, the tap's compatibility mouseenter expands the stack
+            // BEFORE click fires, sliding the button out from under the finger
+            // so the click misses. pointerup lands first. (A following click,
+            // if it still hits, is a no-op — dismissing toasts are skipped.)
+            // Only act on a release that started on the button.
+            btn.addEventListener('pointerdown', (e) => {
+                if (e.pointerType !== 'mouse') this._clearAllPointer = e.pointerId;
+            });
+            btn.addEventListener('pointercancel', () => {
+                this._clearAllPointer = null;
+            });
+            btn.addEventListener('pointerup', (e) => {
+                if (e.pointerType === 'mouse' || e.pointerId !== this._clearAllPointer) return;
+                this._clearAllPointer = null;
+                e.stopPropagation();
+                this.dismissAll();
+            });
+            this.container.appendChild(btn);
+            this._clearAllBtn = btn;
+        }
+
+        if (this._clearAllBtn.textContent !== config.clearAllLabel) {
+            this._clearAllBtn.textContent = config.clearAllLabel;
+        }
+
+        const clearable = visible.filter(t => t.type !== 'loading').length;
+        this.container.setAttribute('data-clearable', clearable >= CLEAR_ALL_MIN ? 'true' : 'false');
     }
 
     _pruneOld() {
@@ -469,7 +596,7 @@ class ToastManager {
     _resetSwipe() {
         this.swipingToast = null;
         this.pointerStart = null;
-        if (!this.hovering) {
+        if (!this._isEngaged()) {
             this._setExpanded(false);
         }
     }
@@ -538,14 +665,24 @@ toast.dismiss = function (id) {
 };
 
 /**
+ * Dismiss all toasts except loading ones (see ToastManager#dismissAll).
+ */
+toast.dismissAll = function () {
+    manager.dismissAll();
+};
+
+/**
  * Configure global defaults
- * @param {Object} opts - { position, duration, maxVisible }
+ * @param {Object} opts - { position, duration, maxVisible, maxToasts, clearAll, clearAllLabel }
  */
 toast.configure = function (opts = {}) {
     if (opts.position) config.position = opts.position;
     if (opts.duration !== undefined) config.duration = opts.duration;
     if (opts.maxVisible !== undefined) config.maxVisible = opts.maxVisible;
     if (opts.maxToasts !== undefined) config.maxToasts = opts.maxToasts;
+    if (opts.clearAll !== undefined) config.clearAll = !!opts.clearAll;
+    if (opts.clearAllLabel) config.clearAllLabel = String(opts.clearAllLabel);
+    manager._updateLayout();
 };
 
 export { toast };

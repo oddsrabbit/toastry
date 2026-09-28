@@ -292,6 +292,85 @@
     border-color: var(--toastry-action-border-hover, #d1d5db);
 }
 
+/* Dismiss-all button — opt-in via toast.configure({ clearAll: true }).
+   Sits on the stack's growing edge (above for bottom positions, below for
+   top), right-aligned like each toast's close button. Hidden via visibility
+   as well as opacity so it can't take focus while it isn't shown. */
+.toastry-clear-all {
+    position: absolute;
+    right: 0;
+    padding: 4px 10px;
+    font-family: var(--toastry-font, system-ui, -apple-system, sans-serif);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--toastry-text-muted, #6b7280);
+    background: var(--toastry-bg, #fff);
+    border: 1px solid var(--toastry-border, #e5e5e5);
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    /* Hide only after the fade-out; show instantly (see below) so a quick
+       Tab press can land on it. */
+    transition: opacity 0.2s ease, visibility 0s linear 0.2s, background 0.15s ease, color 0.15s ease;
+}
+
+/* Transparent bridge across the gap to the stack, so moving the pointer from
+   a toast to the button never leaves the container and collapses it. */
+.toastry-clear-all::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+}
+
+[data-position="bottom-right"] .toastry-clear-all,
+[data-position="bottom-left"] .toastry-clear-all {
+    bottom: calc(100% + 8px);
+}
+
+[data-position="bottom-right"] .toastry-clear-all::after,
+[data-position="bottom-left"] .toastry-clear-all::after {
+    top: 100%;
+}
+
+[data-position="top-right"] .toastry-clear-all,
+[data-position="top-left"] .toastry-clear-all {
+    top: calc(100% + 8px);
+}
+
+[data-position="top-right"] .toastry-clear-all::after,
+[data-position="top-left"] .toastry-clear-all::after {
+    bottom: 100%;
+}
+
+.toastry-clear-all:hover {
+    background: var(--toastry-close-hover-bg, #f3f4f6);
+    color: var(--toastry-text, #171717);
+}
+
+[data-toastry][data-clearable="true"][data-expanded="true"] .toastry-clear-all {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+}
+
+/* No hover on touch — the stack never expands on its own there, so show the
+   button whenever it applies. */
+@media (hover: none) {
+    [data-toastry][data-clearable="true"] .toastry-clear-all {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+    }
+}
+
 /* Type-specific icon colors */
 [data-type="success"] .toastry-icon { color: var(--toastry-success, #16a34a); }
 [data-type="error"] .toastry-icon { color: var(--toastry-error, #dc2626); }

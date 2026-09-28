@@ -616,7 +616,15 @@
   duration: 5000,            <span class="cm">// Duration in ms, default: 4000 (0 = no auto-dismiss)</span>
   maxVisible: 5,             <span class="cm">// Max visible toasts when collapsed (default: 3)</span>
   maxToasts: 8,              <span class="cm">// Max total toasts before oldest are pruned (default: 5)</span>
+  clearAll: <span class="kw">true</span>,            <span class="cm">// Show a "Dismiss all" button beside a stack of 2+ toasts (default: false)</span>
+  clearAllLabel: <span class="st">'Clear'</span>,     <span class="cm">// Button label (default: 'Dismiss all')</span>
 });</pre></div>
+    </div>
+
+    <div class="api-card">
+        <h3>toast.dismissAll()</h3>
+        <p>Dismiss every toast except loading ones, which stand for work still in flight. This is what the <code>clearAll</code> button calls. The button shows when the stack expands (on hover or keyboard focus), or always on touch devices.</p>
+        <div class="code-block"><pre><span class="fn">toast.dismissAll</span>();</pre></div>
     </div>
 
     <div class="api-card">

@@ -16,6 +16,10 @@ export interface ToastConfigOptions {
   duration?: number;
   maxVisible?: number;
   maxToasts?: number;
+  /** Show a "dismiss all" button beside the stack when 2+ toasts are showing. Default false. */
+  clearAll?: boolean;
+  /** Label for the dismiss-all button. Default "Dismiss all". */
+  clearAllLabel?: string;
 }
 
 export interface PromiseStates<T> {
@@ -33,6 +37,8 @@ export interface Toast {
   loading(message: string, options?: Omit<ToastOptions, 'type'>): number;
   promise<T>(promise: Promise<T>, states?: PromiseStates<T>): Promise<T>;
   dismiss(id?: number): void;
+  /** Dismiss every toast except loading ones. */
+  dismissAll(): void;
   configure(opts: ToastConfigOptions): void;
 }
 
